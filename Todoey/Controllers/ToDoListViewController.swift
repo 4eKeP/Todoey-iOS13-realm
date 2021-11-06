@@ -3,7 +3,7 @@
 import UIKit
 import RealmSwift
 
-class ToDoListViewController: UITableViewController{
+class ToDoListViewController: SwipeTableViewController{
     
     var toDoItems: Results<Item>?
     let realm = try! Realm()
