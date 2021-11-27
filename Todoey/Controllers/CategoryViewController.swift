@@ -2,6 +2,7 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class CategoryViewController: SwipeTableViewController {
     
@@ -16,16 +17,26 @@ class CategoryViewController: SwipeTableViewController {
         
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        guard let navBar = navigationController?.navigationBar else {fatalError("Navigation controller does not exist.")}
+        
+        navBar.backgroundColor = UIColor(hexString: "1D9BF6")
+        
+        
+    }
     // MARK: - Table view data source
    
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
-        
-        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
-        
-//        cell.delegate = self
+        if let category = categories?[indexPath.row]{
+            cell.textLabel?.text = category.name
+            guard let categoryColor = UIColor(hexString: category.color) else {fatalError()}
+            cell.backgroundColor = categoryColor
+            cell.textLabel?.textColor = ContrastColorOf(categoryColor, returnFlat: true)
+        }
+       
         
         return cell
     }
@@ -79,6 +90,7 @@ class CategoryViewController: SwipeTableViewController {
             //what will happen once the user click the Add Item button ou our UIAlert
             let newCategory = Category()
             newCategory.name = textField.text!
+            newCategory.color = UIColor.randomFlat().hexValue()
             self.save(category: newCategory)
         }
         alert.addTextField { alertTextField in
@@ -105,25 +117,5 @@ class CategoryViewController: SwipeTableViewController {
     
 }
 
-//MARK: - Search bar methods
-//    extension CategoryViewController: UISearchBarDelegate{
-//        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//            let request : NSFetchRequest<Category> = Category.fetchRequest()
-//
-//            request.predicate = NSPredicate(format: "name CONTAINS[cd] %@", searchBar.text!)
-//
-//            request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-//
-//            loadCategory(whith: request)
-//
-//        }
-//        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//            if searchBar.text?.count == 0 {
-//                loadCategory()
-//                DispatchQueue.main.async {
-//                    searchBar.resignFirstResponder()
-//                }
-//            }
-//        }
-//    }
+
 

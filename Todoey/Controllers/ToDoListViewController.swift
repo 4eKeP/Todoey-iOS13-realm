@@ -2,11 +2,16 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class ToDoListViewController: SwipeTableViewController{
     
     var toDoItems: Results<Item>?
     let realm = try! Realm()
+    
+    
+    @IBOutlet weak var searchBar: UISearchBar!
+    
     var selectedCategory: Category? {
         didSet{
             loadItems()
@@ -17,10 +22,27 @@ class ToDoListViewController: SwipeTableViewController{
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         tableView.delegate = self
         
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        
+        if let colorHex = selectedCategory?.color{
+            
+            title = selectedCategory!.name
+            guard let navBar = navigationController?.navigationBar else {fatalError("Navigation controller does not exist.")}
+            if let navBarColor = UIColor(hexString: colorHex){
+                navBar.barTintColor = navBarColor
+                navBar.tintColor = ContrastColorOf(navBarColor, returnFlat: true)
+                navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : ContrastColorOf(navBarColor, returnFlat: true)]
+                searchBar.barTintColor = navBarColor
+            }
+        }
+    }
+    
+    
     // MARK: - Table view data source
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
@@ -28,6 +50,12 @@ class ToDoListViewController: SwipeTableViewController{
         
         if let item = toDoItems?[indexPath.row]{
             cell.textLabel?.text = item.title
+            
+            if let colour = UIColor(hexString: selectedCategory!.color)?.darken(byPercentage:CGFloat(indexPath.row) / CGFloat(toDoItems!.count)){
+                                    cell.backgroundColor = colour
+                cell.textLabel?.textColor = ContrastColorOf(colour, returnFlat: true)
+            }
+            
             
             cell.accessoryType = item.done ? .checkmark : .none
         }else{
